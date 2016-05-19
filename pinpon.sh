@@ -5,6 +5,15 @@ PRIMERFILA=0                              # First row of game area
 PRIMERCOLUMNA=0                              # First col of game area
 ULTIMACOLUMNA=$( tput cols )                            # Last col of game area
 ULTIMAFILA=$( tput lines - 1 ) 
+RAQUETA="_____"
+RAQUETAX=$(( $ULTIMACOLUMNA / 2 - 3 ))
+RAQUETAY=$(( $ULTIMAFILA / 2 + 5 ))
+dibujarRAQUETA(){
+    y=$1
+    x=$2
+    tput cup $y $x 
+    printf %b "$RAQUETA"
+}
 
 dibujarbordes() {
    # Draw top
@@ -35,7 +44,8 @@ clear
 tput civis #oculta el cursor
 tput bold
 dibujarbordes
-
+dibujarbordes
+dibujarRAQUETA $RAQUETAY $RAQUETAX
 while [ $bandera == 0 ]
 	do
 		read -s -n 1 key
