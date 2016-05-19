@@ -1,14 +1,16 @@
 #!/bin/bash
 
 CARACTERBORDE="/"
-PRIMERFILA=0                              # First row of game area
-PRIMERCOLUMNA=0                              # First col of game area
-ULTIMACOLUMNA=$( tput cols )                            # Last col of game area
+PRIMERFILA=0                             
+PRIMERCOLUMNA=0                              
+ULTIMACOLUMNA=$( tput cols )                            
 ULTIMAFILA=$( tput lines - 1 ) 
-RAQUETA="_____"
+RAQUETA="///////"
 RAQUETAX=$(( $ULTIMACOLUMNA / 2 - 3 ))
 RAQUETAY=$(( $ULTIMAFILA / 2 + 5 ))
-
+PELOTA="O"
+PELOTAX=$(( $RAQUETAX + ${#RAQUETA} / 2 ))
+PELOTAY=$(( $RAQUETAY - 1 ))
 NUMRECORRER=2
 dibujarRAQUETA(){
     y=$1
@@ -18,7 +20,7 @@ dibujarRAQUETA(){
 }
 
 dibujarbordes() {
-   # Draw top
+   # Dibujar borde superior
    tput setf 6
    tput cup 0 0
    x=$PRIMERCOLUMNA
@@ -39,19 +41,45 @@ dibujarbordes() {
    tput setf 9
 }
 
+moverPELOTA(){
+    VARIABLE=`echo $(($RANDOM % 2))`
+    tput cup $PELOTAY $PELOTAX
+    tput ech ${#PELOTA}
+    VARIABLE=0
+    case "$VARIABLE" in
+    0)  
+        PELOTAX=$(( $PELOTAX - 1 ))
+        PELOTAY=$(( $PELOTAY - 1 ))
+        ;;
+    1)   
+        PELOTAY=$(( $PELOTAY - 1 ))
+        ;;
+    2)   
+        PELOTAX=$(( $PELOTAX + 1 ))
+        PELOTAY=$(( $PELOTAY - 1 ))
+        ;;
+   esac
+   tput cup $PELOTAY $PELOTAX
+    printf %b "$PELOTA"
+}
 typeset -i bandera
 	bandera=0
     
 clear
 tput civis #oculta el cursor
-tput bold
+tput bold #Modo negritas
 dibujarbordes
 dibujarRAQUETA $RAQUETAY $RAQUETAX
+tput cup $PELOTAY $PELOTAX
+    printf %b "$PELOTA"
+#Ejecucion principal o main
 while [ $bandera == 0 ]
 	do
-		read -s -n 1 key
+        moverPELOTA
+		read -s -n 1 -t 0.2 key
+        
     case "$key" in
-    a)  
+    a|A)  
         tput cup $RAQUETAY $RAQUETAX
         tput ech ${#RAQUETA} #borrar cierto numero de caracteres
         auxNum=$(( $RAQUETAX -  $NUMRECORRER ))
@@ -59,8 +87,8 @@ while [ $bandera == 0 ]
             RAQUETAX=$auxNum
         fi
         dibujarRAQUETA $RAQUETAY $RAQUETAX
-    ;;
-    d)   
+      ;;
+    d|D)   
         tput cup $RAQUETAY $RAQUETAX
         tput ech ${#RAQUETA} #borrar cierto numero de caracteres
         auxNum=$(( $RAQUETAX +  $NUMRECORRER ))
@@ -68,12 +96,12 @@ while [ $bandera == 0 ]
             RAQUETAX=$auxNum
         fi
         dibujarRAQUETA $RAQUETAY $RAQUETAX
-    ;;
-    x)   bandera=1
+        ;;
+    x|X)   bandera=1
             tput cvvis #Oculta el cursor
             stty echo
             tput reset
             
-            ;;
+      ;;
    esac
 	done
