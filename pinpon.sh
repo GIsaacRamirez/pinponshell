@@ -8,6 +8,8 @@ ULTIMAFILA=$( tput lines - 1 )
 RAQUETA="_____"
 RAQUETAX=$(( $ULTIMACOLUMNA / 2 - 3 ))
 RAQUETAY=$(( $ULTIMAFILA / 2 + 5 ))
+
+NUMRECORRER=2
 dibujarRAQUETA(){
     y=$1
     x=$2
@@ -44,16 +46,31 @@ clear
 tput civis #oculta el cursor
 tput bold
 dibujarbordes
-dibujarbordes
 dibujarRAQUETA $RAQUETAY $RAQUETAX
 while [ $bandera == 0 ]
 	do
 		read -s -n 1 key
     case "$key" in
-    a)   DIRECTION="l";;
-    d)   DIRECTION="r";;
+    a)  
+        tput cup $RAQUETAY $RAQUETAX
+        tput ech ${#RAQUETA} #borrar cierto numero de caracteres
+        auxNum=$(( $RAQUETAX -  $NUMRECORRER ))
+        if (( auxNum >= 0)); then
+            RAQUETAX=$auxNum
+        fi
+        dibujarRAQUETA $RAQUETAY $RAQUETAX
+    ;;
+    d)   
+        tput cup $RAQUETAY $RAQUETAX
+        tput ech ${#RAQUETA} #borrar cierto numero de caracteres
+        auxNum=$(( $RAQUETAX +  $NUMRECORRER ))
+        if (( auxNum < $ULTIMACOLUMNA - ${#RAQUETA} )); then
+            RAQUETAX=$auxNum
+        fi
+        dibujarRAQUETA $RAQUETAY $RAQUETAX
+    ;;
     x)   bandera=1
-            tput cvvis
+            tput cvvis #Oculta el cursor
             stty echo
             tput reset
             
