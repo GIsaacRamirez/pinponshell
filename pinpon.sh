@@ -11,6 +11,8 @@ RAQUETAY=$(( $ULTIMAFILA / 2 + 5 ))
 PELOTA="O"
 PELOTAX=$(( $RAQUETAX + ${#RAQUETA} / 2 ))
 PELOTAY=$(( $RAQUETAY - 1 ))
+DIRECCIONPELOTAX=-10
+DIRECCIONPELOTAY=-1
 NUMRECORRER=2
 dibujarRAQUETA(){
     y=$1
@@ -41,27 +43,68 @@ dibujarbordes() {
    tput setf 9
 }
 
+toqueBORDE(){
+        tput cup $PELOTAY $PELOTAX
+        tput ech ${#PELOTA} #borrar cierto numero de caracteres
+        auxNum=$(( $RAQUETAX - 1 ))
+        if (( auxNum >= 0)); then
+            RAQUETAX=$auxNum
+        fi
+        dibujarRAQUETA $RAQUETAY $RAQUETAX
+}
 moverPELOTA(){
-    VARIABLE=`echo $(($RANDOM % 2))`
-    tput cup $PELOTAY $PELOTAX
-    tput ech ${#PELOTA}
-    VARIABLE=0
-    case "$VARIABLE" in
-    0)  
-        PELOTAX=$(( $PELOTAX - 1 ))
-        PELOTAY=$(( $PELOTAY - 1 ))
-        ;;
-    1)   
-        PELOTAY=$(( $PELOTAY - 1 ))
-        ;;
-    2)   
-        PELOTAX=$(( $PELOTAX + 1 ))
-        PELOTAY=$(( $PELOTAY - 1 ))
-        ;;
-   esac
+    tput cup $PELOTAY $0
+    #tput ech ${#PELOTA}
+    tput el 
+    dibujarRAQUETA $RAQUETAY $RAQUETAX
+    
+    if(( $DIRECCIONPELOTAX == - 10 ));then
+         VARIABLE=`echo $(($RANDOM % 2))`
+        case "$VARIABLE" in
+            0)  DIRECCIONPELOTAX=-1  ;;
+            1)  DIRECCIONPELOTAX=1   ;;
+        esac
+     else
+        if(( $PELOTAY == 1 || $PELOTAY == $ULTIMAFILA - 2 ));then
+            DIRECCIONPELOTAY=$(( $DIRECCIONPELOTAY * - 1 ))
+            VARIABLE=`echo $(($RANDOM % 2))`
+            case "$VARIABLE" in
+                0)   DIRECCIONPELOTAX=-1   ;;
+                1)   DIRECCIONPELOTAX=1;;
+            esac
+        else
+            aux=$(( $PELOTAY + $DIRECCIONPELOTAY ))
+            
+             if(( $aux == $RAQUETAY )); then
+                    if(( $PELOTAX <= $RAQUETAX + 7  && $PELOTAX >= $RAQUETAX - 1 ));then
+                    DIRECCIONPELOTAY=$(( $DIRECCIONPELOTAY * - 1 )) #cambiar direccion de Y
+                    VARIABLE=`echo $(($RANDOM % 2))`
+                    case "$VARIABLE" in
+                        0)  
+                        DIRECCIONPELOTAX=-1  ;;
+                        1)   
+                        DIRECCIONPELOTAX=1   ;;
+                    esac
+                fi
+            fi
+        fi #fin de if(( $PELOTAY == 1 || $PELOTAY == $ULTIMAFILA - 2 ))
+    fi #fin de if(( $DIRECCIONPELOTAX == - 10 ))
+   
+    
+   if(( $PELOTAX == 1 ));then 
+        PELOTAX=$(( $ULTIMACOLUMNA - 1 ))
+     else
+     if(( $PELOTAX >= $ULTIMACOLUMNA ));then
+        PELOTAX=1
+     fi
+   fi
+   PELOTAX=$(( $PELOTAX + $DIRECCIONPELOTAX ))
+   PELOTAY=$(( $PELOTAY + $DIRECCIONPELOTAY ))
+        
    tput cup $PELOTAY $PELOTAX
     printf %b "$PELOTA"
 }
+
 typeset -i bandera
 	bandera=0
     
@@ -75,11 +118,10 @@ tput cup $PELOTAY $PELOTAX
 #Ejecucion principal o main
 while [ $bandera == 0 ]
 	do
-        moverPELOTA
-		read -s -n 1 -t 0.2 key
+        moverPELOTA && read -s -n 1 -t 0.3 key
         
     case "$key" in
-    a|A)  
+    a)  
         tput cup $RAQUETAY $RAQUETAX
         tput ech ${#RAQUETA} #borrar cierto numero de caracteres
         auxNum=$(( $RAQUETAX -  $NUMRECORRER ))
@@ -88,7 +130,7 @@ while [ $bandera == 0 ]
         fi
         dibujarRAQUETA $RAQUETAY $RAQUETAX
       ;;
-    d|D)   
+    d)   
         tput cup $RAQUETAY $RAQUETAX
         tput ech ${#RAQUETA} #borrar cierto numero de caracteres
         auxNum=$(( $RAQUETAX +  $NUMRECORRER ))
@@ -104,4 +146,4 @@ while [ $bandera == 0 ]
             
       ;;
    esac
-	done
+   done
