@@ -1,2 +1,2 @@
 # pinponshell
-pinpon en shell
+pinpon en shell Linux
